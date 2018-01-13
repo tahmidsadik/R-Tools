@@ -1,0 +1,52 @@
+// type max distance and current distance measure tool node name here
+string $max_distance_node_name = "";
+string $current_distance_node_name = "";
+string $driver = $current_distance_node_name + ".distance";
+
+string $up_arm_joint_name = "";
+string $low_arm_joint_name = "";
+
+float $up_arm_length = getAttr($up_arm_joint_name + ".translateX");
+float $low_arm_length = getAttr($low_arm_joint_name + ".translateX");
+
+
+float $max_distance = getAttr($max_distance_node_name + ".distance");
+float $current_distance = getAttr($current_distance_node_name + ".distance");
+
+print("Max distance: " + $max_distance + "\n");
+print("Current distance: " + $max_distance + "\n");
+
+setDrivenKeyframe -currentDriver $driver
+                  -driverValue $max_distance
+                  -attribute "translateX"
+                  -value $up_arm_length
+                  $up_arm_joint_name;
+setDrivenKeyframe -currentDriver $driver
+                  -driverValue $max_distance
+                  -attribute "translateX"
+                  -value $low_arm_length
+                  $up_arm_joint_name;
+
+setDrivenKeyframe -currentDriver $driver
+                  -driverValue ($max_distance * 2)
+                  -attribute "translateX"
+                  -value ($up_arm_length * 2)
+                  $up_arm_joint_name;
+
+setDrivenKeyframe -currentDriver $driver
+                  -driverValue ($max_distance * 2)
+                  -attribute "translateX"
+                  -value ($low_arm_length * 2)
+                  $up_arm_joint_name;
+
+setDrivenKeyframe -currentDriver $driver
+                  -driverValue 0
+                  -attribute "translateX"
+                  -value $up_arm_length
+                  $up_arm_joint_name;
+
+setDrivenKeyframe -currentDriver $driver
+                  -driverValue 0
+                  -attribute "translateX"
+                  -value $low_arm_length
+                  $up_arm_joint_name;

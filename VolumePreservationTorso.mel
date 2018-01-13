@@ -1,0 +1,39 @@
+// the formulae for stretching on the x axis is
+
+float $original_curve_len = 2.10;
+float $sx = curveInfo1.arcLength / $original_curve_len;
+
+// we will need inverse scale to volume preserve the squash-strech
+float $inverseScale = 1/sqrt($sx);
+
+
+// here we scale all the joints to stretch
+Spine_IK_Joint_Hip.scaleX = $sx;
+Spine_IK_Joint1.scaleX = $sx;
+Spine_IK_Joint2.scaleX = $sx;
+Spine_IK_Joint3.scaleX = $sx;
+Spine_IK_Joint4.scaleX = $sx;
+Spine_IK_Joint5.scaleX = $sx;
+Spine_IK_Joint_Shoulder.scaleX = $sx;
+
+// here we inverse scale the joints on y & z axis to preserve volumes
+Spine_IK_Joint_Hip.scaleY = $inverseScale;
+Spine_IK_Joint_Hip.scaleZ = $inverseScale;
+
+Spine_IK_Joint1.scaleY = pow($inverseScale, 1.5);
+Spine_IK_Joint1.scaleZ = pow($inverseScale, 1.5);
+
+Spine_IK_Joint2.scaleY = pow($inverseScale, 1.9);
+Spine_IK_Joint2.scaleZ = pow($inverseScale, 1.9);
+
+Spine_IK_Joint3.scaleY = pow($inverseScale, 2.1);
+Spine_IK_Joint3.scaleZ = pow($inverseScale, 2.1);
+
+Spine_IK_Joint4.scaleY = pow($inverseScale, 1.9);
+Spine_IK_Joint4.scaleZ = pow($inverseScale, 1.9);
+
+Spine_IK_Joint5.scaleY = pow($inverseScale, 1.5);
+Spine_IK_Joint5.scaleZ = pow($inverseScale, 1.5);
+
+Spine_IK_Joint_Shoulder.scaleY = $inverseScale;
+Spine_IK_Joint_Shoulder.scaleZ = $inverseScale;
