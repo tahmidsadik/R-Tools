@@ -1,9 +1,8 @@
 import pymel.core as pm
 import pymel.core.datatypes as dt
-from pymel.core.general import ls
 
 
-class JointSplitter():
+class JointSplitter:
     def __init__(self):
         pass
 
@@ -16,7 +15,6 @@ class JointSplitter():
 
     @staticmethod
     def validate_for_split_joint(sl):
-        print(sl)
         if not sl:
             pm.windows.confirmDialog(message=JointSplitter.error_messages["emptySelection"], button=["Okay"])
             return False
@@ -33,18 +31,28 @@ class JointSplitter():
             return False
 
     @staticmethod
-    def split_joints(n=5):
-        print(n)
-        selection = ls(selection=True)
-        if JointSplitter.validate_for_split_joint(selection):
-            first_joint = ls(selection=True)[0]
-            fj = pm.joint(pm.general.ls(selection=True)[0], query=True, position=True)
-            lj = pm.joint(pm.general.ls(selection=True)[1], query=True, position=True)
-            fj_vector = dt.Vector(fj[0], fj[1], fj[2])
-            lj_vector = dt.Vector(lj[0], lj[1], lj[2])
-            new_joint = 0
-            pm.select(deselect=True)
-            for i in range(0, n - 1):
-                split_point = fj_vector.__mul__((n - i - 1.0) / n).__add__(lj_vector.__mul__(i + 1.0) / n)
-                new_joint = pm.insertJoint(new_joint if i > 0 else first_joint)
-                pm.joint(new_joint, edit=True, component=True, position=split_point)
+    def split_joints(first_joint, second_joint, n=5):
+        if not (first_joint or second_joint):
+            return -1
+        JointSplitter.flatten_joints(first_joint, second_joint)
+        fj = pm.joint(first_joint, query=True, position=True)
+        lj = pm.joint(second_joint, query=True, position=True)
+        fj_vector = dt.Vector(fj[0], fj[1], fj[2])
+        lj_vector = dt.Vector(lj[0], lj[1], lj[2])
+        new_joint = None
+        pm.select(deselect=True)
+        for i in range(0, n - 1):
+            split_point = fj_vector.__mul__((n - i - 1.0) / n).__add__(lj_vector.__mul__(i + 1.0) / n)
+            new_joint = pm.insertJoint(new_joint if i > 0 else first_joint)
+            pm.joint(new_joint, edit=True, component=True, position=split_point)
+        pm.select(d=True)
+
+    @staticmethod
+    def flatten_joints(parent_joint, child_joint):
+        """ deletes all joints between parent and child joints"""
+        pm.parent(child_joint, world=True)
+        x = pm.listRelatives(parent_joint, children=True)
+        for i in x:
+            print(i)
+            pm.delete(i)
+        pm.parent(child_joint, parent_joint)
