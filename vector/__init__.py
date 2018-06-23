@@ -1,3 +1,4 @@
+from plugin import JointSplitter
 from vector import Vector
 
-path = "/Users/tahmid/projects/python/R-Tools/R-Tools/"
+path = "C:\\Users\\tahmi\\PycharmProjects\\R-Tools\\vector"
