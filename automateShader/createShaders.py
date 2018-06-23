@@ -1,5 +1,5 @@
-# VRAY_SHADER_NODE = "VRayMtl"
-# ARNOLD_SHADER_NODE = "aiStandardSurface"
+# VRAY_SHADER_NODE = 'VRayMtl'
+# ARNOLD_SHADER_NODE = 'aiStandardSurface'
 #
 # SHADER_TYPE_VRAY = 1
 # SHADER_TYPE_ARNOLD = 2
@@ -9,24 +9,32 @@
 #     if SHADER_TYPE_VRAY:
 #         shader = cmds.shadingNode(VRAY_SHADER_NODE, asShader=True)
 #         print(shader)
-#         surfaceShader = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shader + 'SG')
-#
+#         surfaceShader = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shader + 'SG') #
 #
 # shader1 = cmds.shadingNode('anisotrophic', asShader=True)
 
+from os import listdir, sep, path
+import platform
 import pprint
-from os import listdir
 
-directory = "C:\\Users\\tahmi\\Google Drive\\MayaProjects\\InteriorPortfolio"
+pp = pprint.PrettyPrinter()
+directory = ''
 
-ignoreTexList = ["3dPaintTextures"]
+if platform.system == 'Windows':
+    directory = path.join('c:', 'Users', 'tahmi', 'Google Drive', 'MayaProjects', 'InteriorPortfolio')
+elif platform.system == 'Darwin':
+    directory = path.join(sep, 'Users', 'tahmid', 'Documents', 'InteriorPortfolio')
+else:
+    directory = path.join(sep, 'Users', 'tahmid', 'Documents', 'InteriorPortfolio')
 
-materials = listdir(directory + "\\sourceImages")
+ignoreTexList = ['3dPaintTextures']
+print(directory)
 
+textureSetPathList = listdir(path.join(directory, 'sourceimages'))
 
 def listDirWithFullPath(path):
     listDirectory = listdir(path)
-    return map(lambda p: path + "\\" + p, listDirectory)
+    return map(lambda p: path.join(path, p, listDirectory))
 
 
 def containsInList(givenString, list):
@@ -41,7 +49,7 @@ def filterMaterials(materials, filterList=ignoreTexList):
 
 
 def createMaterialPaths(materialList):
-    return map(lambda mat: directory + "\\sourceImages\\" + mat, materialList)
+    return map(lambda mat: path.join(directory, 'sourceImages', mat), materialList)
 
 
 def listMaterials(materialPathList):
@@ -49,24 +57,23 @@ def listMaterials(materialPathList):
     vrayMaterials = []
     redshiftMaterials = []
     shaderlessMaterials = []
-    for path in materialPathList:
-        mapGroup = listdir(path)
-        if containsInList('Arnold', mapGroup) or containsInList('Vray', mapGroup) or containsInList('Redshift',
-                                                                                                    mapGroup):
+    for matPath in materialPathList:
+        mapGroup = listdir(matPath)
+        if containsInList('Arnold', mapGroup) or containsInList('Vray', mapGroup) or containsInList('Redshift', mapGroup):
             if containsInList('Arnold', mapGroup):
-                arnoldMaterials.append(path + '\\Arnold')
+                arnoldMaterials.append(path.join(matPath, 'Arnold'))
             if containsInList('Vray', mapGroup):
-                vrayMaterials.append(path + '\\Vray')
+                vrayMaterials.append(path.join(matPath, 'Vray'))
             if containsInList('Redshift', mapGroup):
-                redshiftMaterials.append(path + '\\Redshift')
+                redshiftMaterials.append(path.join(matPath, 'Redshift'))
         else:
-            shaderlessMaterials.append(path)
+            shaderlessMaterials.append(matPath)
     return \
         {
-            "arnoldMaterials": arnoldMaterials,
-            "vrayMaterials": vrayMaterials,
-            "redshiftMaterials": redshiftMaterials,
-            "shaderlessMaterials": shaderlessMaterials
+            'arnoldMaterials': arnoldMaterials,
+            'vrayMaterials': vrayMaterials,
+            'redshiftMaterials': redshiftMaterials,
+            'shaderlessMaterials': shaderlessMaterials
         }
 
 
@@ -75,6 +82,7 @@ def findAllTextureSets(textureSetPath):
                         map(lambda str: str.split("_"), listdir(textureSetPath)))))
 
 
-materialList = listMaterials(createMaterialPaths(filterMaterials(materials)))
+filteredTextureSetPaths = listMaterials(createMaterialPaths(filterMaterials(textureSetPathList)))
+pp.pprint(filteredTextureSetPaths)
 
-pprint.PrettyPrinter().pprint(map(lambda texSet: findAllTextureSets(texSet), materialList["arnoldMaterials"]))
+pprint.PrettyPrinter().pprint(list(map(lambda texSet: findAllTextureSets(texSet), filteredTextureSetPaths['arnoldMaterials'])))
