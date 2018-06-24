@@ -82,7 +82,31 @@ def findAllTextureSets(textureSetPath):
                         map(lambda str: str.split("_"), listdir(textureSetPath)))))
 
 
+def listAllTextureSets(materialPaths):
+    textureSets = {}
+    for key, value in materialPaths.items():
+        tset = []
+        for tsetPath in value:
+            ts = {textureSets: findAllTextureSets(tsetPath),
+                  path: tsetPath}
+            print(ts)
+            tset.add(ts)
+        if key == 'arnoldMaterials':
+            textureSets['arnoldTextureSets'] = tset
+        elif key == 'vrayMaterials':
+            textureSets['vrayTextureSets'] = tset
+        elif key == 'redshiftMaterials':
+            textureSets['redshiftTextureSets'] = tset
+        else:
+            textureSets['shaderlessTextureSets'] = tset
+    return textureSets
+
+
+def extractTextureMapsFromTextureSetPath(textureSetPath):
+    listdir(textureSetPath)
+
 filteredTextureSetPaths = listMaterials(createMaterialPaths(filterMaterials(textureSetPathList)))
+pp.pprint(listAllTextureSets(filteredTextureSetPaths))
 pp.pprint(filteredTextureSetPaths)
 
-pprint.PrettyPrinter().pprint(list(map(lambda texSet: findAllTextureSets(texSet), filteredTextureSetPaths['arnoldMaterials'])))
+# pprint.PrettyPrinter().pprint(list(map(lambda texSet: findAllTextureSets(texSet), filteredTextureSetPaths['arnoldMaterials'])))
