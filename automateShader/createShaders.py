@@ -13,22 +13,19 @@
 #
 # shader1 = cmds.shadingNode('anisotrophic', asShader=True)
 
-from os import listdir, sep, path
 import platform
 import pprint
+from os import listdir, sep, path
 
 pp = pprint.PrettyPrinter()
 directory = ''
 
-if platform.system == 'Windows':
-    directory = path.join('c:', 'Users', 'tahmi', 'Google Drive', 'MayaProjects', 'InteriorPortfolio')
-elif platform.system == 'Darwin':
-    directory = path.join(sep, 'Users', 'tahmid', 'Documents', 'InteriorPortfolio')
-else:
+if platform.system() == 'Windows':
+    directory = path.join('C:', sep, 'Users', 'tahmi', 'Google Drive', 'MayaProjects', 'InteriorPortfolio')
+elif platform.system() == 'Darwin':
     directory = path.join(sep, 'Users', 'tahmid', 'Documents', 'InteriorPortfolio')
 
 ignoreTexList = ['3dPaintTextures']
-print(directory)
 
 textureSetPathList = listdir(path.join(directory, 'sourceimages'))
 
@@ -49,7 +46,7 @@ def filterMaterials(materials, filterList=ignoreTexList):
 
 
 def createMaterialPaths(materialList):
-    return map(lambda mat: path.join(directory, 'sourceImages', mat), materialList)
+    return map(lambda mat: path.join(directory, 'sourceimages', mat), materialList)
 
 
 def listMaterials(materialPathList):
@@ -78,7 +75,7 @@ def listMaterials(materialPathList):
 
 
 def findAllTextureSets(textureSetPath):
-    return list(set(map(lambda splittedStrList: "".join(splittedStrList[:-1]),
+    return list(set(map(lambda splittedStrList: "_".join(splittedStrList[:-1]),
                         map(lambda str: str.split("_"), listdir(textureSetPath)))))
 
 
@@ -87,10 +84,9 @@ def listAllTextureSets(materialPaths):
     for key, value in materialPaths.items():
         tset = []
         for tsetPath in value:
-            ts = {textureSets: findAllTextureSets(tsetPath),
-                  path: tsetPath}
-            print(ts)
-            tset.add(ts)
+            ts = {"textureSets": findAllTextureSets(tsetPath),
+                  "path": tsetPath}
+            tset.append(ts)
         if key == 'arnoldMaterials':
             textureSets['arnoldTextureSets'] = tset
         elif key == 'vrayMaterials':
@@ -102,11 +98,39 @@ def listAllTextureSets(materialPaths):
     return textureSets
 
 
-def extractTextureMapsFromTextureSetPath(textureSetPath):
-    listdir(textureSetPath)
+def extractTextureMapsFromTextureSetPath(textureSetDict):
+    """textureSetDict is a dictionary of shape {'path': 'xx', 'textureSets': ['texSet1', 'texSet2']
+       This function finds all the maps of each textureSet contained in a textureSetPath.
+       The function returns a list of shape
+       [{
+            'name': 'tset1',
+            'path': 'path',
+            'maps': [{'type': 'normal', 'path': 'path_to_normal_map'},
+                    {'type': 'diffuse', 'path': 'path_to_diffuse'},
+                    {'type': 'roughness', 'path': 'path_to_roughness'}]
+       }, {
+            'name': 'tset2',
+            'path': 'path',
+            'maps': ['normal', 'diffuse', 'glosiness', 'roughness']
+       }]
+       ]
+    """
+    textureMaps = []
+    for tset in textureSetDict['textureSets']:
+        textureSet = {'name': tset, 'path': textureSetDict['path'], 'maps': []}
+        for tmap in listdir(textureSetDict['path']):
+            if tset in tmap:
+                map_type = tmap.split('_')[-1]
+                map_path = path.join(textureSetDict['path'], tmap)
+                # can't write this
+                # textureSet['maps'] = textureSet['maps'].append({'type': map_type, 'path': map_path})
+                # cause python is a bitch
+                # instead we need to do this
+                textureSet.setdefault('maps', textureSet['maps']).append({'type': map_type, 'path': map_path})
+        textureMaps.append(textureSet)
+
+    return textureMaps
 
 filteredTextureSetPaths = listMaterials(createMaterialPaths(filterMaterials(textureSetPathList)))
-pp.pprint(listAllTextureSets(filteredTextureSetPaths))
-pp.pprint(filteredTextureSetPaths)
-
-# pprint.PrettyPrinter().pprint(list(map(lambda texSet: findAllTextureSets(texSet), filteredTextureSetPaths['arnoldMaterials'])))
+allTextureSets = listAllTextureSets(filteredTextureSetPaths)
+pp.pprint(extractTextureMapsFromTextureSetPath(allTextureSets['arnoldTextureSets'][0]))
